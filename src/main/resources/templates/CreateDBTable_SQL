@@ -1,0 +1,41 @@
+CREATE DATABASE IF NOT EXISTS BaseForExamples
+    COLLATE utf8mb4_unicode_ci;
+
+USE BaseForExamples;
+
+DROP TABLE IF EXISTS CITIES;
+DROP TABLE IF EXISTS CITIES_DESCRIPTIONS;
+
+
+CREATE TABLE CITIES (
+id INT NOT  NULL auto_increment,
+code INTEGER(10) default NULL,
+name  VARCHAR(40) default NULL,
+population  INTEGER(20) default NULL,
+founded  DATE default NULL,
+PRIMARY KEY (id)
+);
+
+
+CREATE TABLE CITIES_DESCRIPTIONS (
+id INT NOT  NULL auto_increment,
+city_id INT,
+description VARCHAR(50) default NULL,
+PRIMARY KEY (id)
+
+);
+
+
+INSERT INTO CITIES (code, name, population, founded)
+VALUES ('495','Москва', 12000000, '1147-1-01'),
+       ('812', 'Питер', 5000000, '1703-1-01');
+
+       INSERT INTO CITIES_DESCRIPTIONS (city_id, description)
+VALUES
+		(1, 'красная площадь'),
+		(1, 'столица России'),
+       (1, 'кремль'),
+       (2, 'холодная погода'),
+       (2, 'разводные мосты');
+
+

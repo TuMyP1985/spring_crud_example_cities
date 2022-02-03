@@ -1,0 +1,225 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td, th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+    </style>
+</head>
+<body>
+
+<h2>ALL CITIES</h2>
+
+<input id="search_field">
+<button onclick="searchByName()">Search by Name</button>
+<button onclick="searchByCode()">Search by Code</button>
+<button onclick="loadCities()">refresh</button>
+
+<br></br>
+
+<form action="#">
+    <input type="number" id="city_code" placeholder="city code">
+    <input id="city_name" placeholder="city name">
+    <input type="number" id="city_population" placeholder="city population">
+    <input type="date" id="city_founded" placeholder="city founded">
+    <button onclick="createCity()">Add city</button>
+</form>
+
+<br></br>
+
+<table id="citiesList">
+
+</table>
+
+<br></br>
+<br></br>
+
+<form action="#">
+    <input type="number" id="city_id" placeholder="city id">
+    <input id="description" placeholder="description name">
+<button onclick="createDescription()">Add description</button>
+</form>
+
+<br></br>
+
+<table id="descriptionList">
+
+</table>
+
+
+
+<script>
+
+    function drawTableCity(cities) {
+        html = '<tr>\n' +
+            '        <th>city id</th>\n' +
+            '        <th>city code</th>\n' +
+            '        <th>city name</th>\n' +
+            '        <th>city population</th>\n' +
+            '        <th>city founded</th>\n' +
+            '        <th>Delete</th>\n' +
+            '        <th>Description</th>\n' +
+            '    </tr>';
+
+        for (var i = 0; i < cities.length; i++) {
+            var city = cities[i];
+            html = html + '<tr><td>' + city.id + '</td>\n' +
+                '        <td>' + city.code + '</td>\n' +
+                '        <td>' + city.name + '</td>\n' +
+                '        <td>' + city.population + '</td>\n' +
+                '        <td>' + city.founded + '</td>\n' +
+                '        <td><button onclick="deleteCity(' + city.id + ')">Delete</button></td>\n' +
+                '        <td><button onclick="descriptionCity(' + city.id + ')">Description</button></td></tr>';
+
+        }
+        descriptionCity(0); //clear table description
+        return html;
+    }
+
+    function searchByCode() {
+        var code = document.getElementById("search_field").value;
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                var cities = JSON.parse(this.responseText);
+                var html = drawTableCity(cities);
+                document.getElementById("citiesList").innerHTML = html;
+            }
+        };
+        xhttp.open("GET", "http://localhost:8080/cities/findByCode?code=" + code, true);
+        xhttp.send();
+
+    }
+
+    function searchByName() {
+        var name = document.getElementById("search_field").value;
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                var cities = JSON.parse(this.responseText);
+                var html = drawTableCity(cities);
+                document.getElementById("citiesList").innerHTML = html;
+            }
+        };
+        xhttp.open("GET", "http://localhost:8080/cities/findByName?name=" + name, true);
+        xhttp.send();
+
+    }
+
+    function deleteCity(cityId) {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                loadCities();
+            }
+        }
+        xhttp.open("DELETE", "http://localhost:8080/cities/delete/" + cityId, true);
+        xhttp.send();
+
+    }
+
+    function deleteDescription(descriptionId) {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            var city_id = document.getElementById("city_id").value;
+            if (this.readyState == 4 && this.status == 200) {
+                descriptionCity(city_id);
+            }
+        }
+        xhttp.open("DELETE", "http://localhost:8080/description/delete/" + descriptionId, true);
+        xhttp.send();
+    }
+
+    function descriptionCity(cityId) {
+        document.getElementById("city_id").value = cityId;
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                var cities = JSON.parse(this.responseText);
+                var html = '<tr>\n' +
+                    '        <th>Description</th>\n'    +
+                    '        <th>Description</th>\n'   +
+                    '    </tr>';
+
+                for (var i = 0; i < cities.length; i++) {
+                    var city = cities[i];
+                    html = html + '<tr><td>' + city.description + '</td>\n' +
+                    '           <td><button onclick="deleteDescription(' + city.id + ')">Delete</button></td></tr>';
+
+                }
+
+                document.getElementById("descriptionList").innerHTML = html;
+            }
+        };
+        xhttp.open("GET", "http://localhost:8080/description/findByCityId?cityId=" + cityId, true);
+        xhttp.send();
+
+
+    }
+
+    function createCity() {
+        var cityCode = document.getElementById("city_code").value;
+        var cityName = document.getElementById("city_name").value;
+        var cityPopulation = document.getElementById("city_population").value;
+        var cityFounded = document.getElementById("city_founded").value;
+
+        var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance
+        xmlhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                loadCities();
+            }
+        }
+        xmlhttp.open("POST", "http://localhost:8080/cities/save");
+        xmlhttp.setRequestHeader("Content-Type", "application/json");
+        xmlhttp.send(JSON.stringify({code: cityCode, name: cityName, population: cityPopulation, founded: cityFounded}));
+
+    }
+
+    function createDescription() {
+        var city_id = document.getElementById("city_id").value;
+        var description = document.getElementById("description").value;
+        var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance
+        xmlhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                descriptionCity(city_id);
+            }
+        }
+        xmlhttp.open("POST", "http://localhost:8080/description/save");
+        xmlhttp.setRequestHeader("Content-Type", "application/json");
+        xmlhttp.send(JSON.stringify({city_id: city_id, description: description}));
+
+    }
+
+    function loadCities() {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+
+            if (this.readyState == 4 && this.status == 200) {
+                var cities = JSON.parse(this.responseText);
+                var html = drawTableCity(cities);
+                document.getElementById("citiesList").innerHTML = html;
+            }
+        };
+        xhttp.open("GET", "http://localhost:8080/cities/findAll", false);
+        xhttp.send();
+    }
+
+    loadCities();
+</script>
+</body>
+</html>
