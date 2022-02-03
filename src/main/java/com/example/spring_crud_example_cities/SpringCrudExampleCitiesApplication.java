@@ -19,6 +19,6 @@ public class SpringCrudExampleCitiesApplication implements ApplicationRunner {
 
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
-//		cityRepository.findAll().forEach(n-> System.out.println(n.getName()));
+		cityRepository.findAll().forEach(n-> System.out.println(n.getName()));
 	}
 }
